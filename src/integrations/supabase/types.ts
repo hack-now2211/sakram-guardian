@@ -14,7 +14,110 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      profiles: {
+        Row: {
+          api_key: string | null
+          auth_provider: string
+          created_at: string
+          email: string
+          id: string
+          name: string
+          role: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          api_key?: string | null
+          auth_provider?: string
+          created_at?: string
+          email: string
+          id?: string
+          name: string
+          role?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          api_key?: string | null
+          auth_provider?: string
+          created_at?: string
+          email?: string
+          id?: string
+          name?: string
+          role?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      sakram_logs: {
+        Row: {
+          action: string
+          component: string
+          details: string | null
+          event_id: string | null
+          id: string
+          step_number: number
+          timestamp: string
+        }
+        Insert: {
+          action: string
+          component: string
+          details?: string | null
+          event_id?: string | null
+          id?: string
+          step_number: number
+          timestamp?: string
+        }
+        Update: {
+          action?: string
+          component?: string
+          details?: string | null
+          event_id?: string | null
+          id?: string
+          step_number?: number
+          timestamp?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "sakram_logs_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "system_events"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      system_events: {
+        Row: {
+          created_at: string
+          description: string
+          event_type: string
+          id: string
+          resolved_at: string | null
+          severity: string
+          status: string
+        }
+        Insert: {
+          created_at?: string
+          description: string
+          event_type: string
+          id?: string
+          resolved_at?: string | null
+          severity?: string
+          status?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string
+          event_type?: string
+          id?: string
+          resolved_at?: string | null
+          severity?: string
+          status?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
