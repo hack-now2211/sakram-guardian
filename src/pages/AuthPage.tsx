@@ -11,6 +11,7 @@ import { Shield, Mail, Lock, User, Chrome, AlertCircle, CheckCircle } from "luci
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
+import PasswordStrength from "@/components/PasswordStrength";
 
 export default function AuthPage() {
   const [isLoading, setIsLoading] = useState(false);
@@ -20,6 +21,7 @@ export default function AuthPage() {
   const [role, setRole] = useState("user");
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
+  const [isPasswordValid, setIsPasswordValid] = useState(false);
   
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -71,6 +73,17 @@ export default function AuthPage() {
 
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    if (!isPasswordValid) {
+      setError("Please ensure your password meets all requirements");
+      toast({
+        title: "Invalid password",
+        description: "Please ensure your password meets all requirements",
+        variant: "destructive",
+      });
+      return;
+    }
+    
     setIsLoading(true);
     setError("");
     setSuccess("");
@@ -294,9 +307,12 @@ export default function AuthPage() {
                         onChange={(e) => setPassword(e.target.value)}
                         className="pl-10"
                         required
-                        minLength={6}
                       />
                     </div>
+                    <PasswordStrength 
+                      password={password} 
+                      onStrengthChange={setIsPasswordValid}
+                    />
                   </div>
 
                   <div className="space-y-2">

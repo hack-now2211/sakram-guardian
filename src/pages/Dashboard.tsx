@@ -15,11 +15,13 @@ import {
   Network,
   Server,
   Clock,
-  ArrowRight
+  ArrowRight,
+  LogOut
 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { useNavigate } from "react-router-dom";
 
 interface SystemEvent {
   id: string;
@@ -42,6 +44,7 @@ interface SakramLog {
 export default function Dashboard() {
   const { user, profile, loading } = useAuth();
   const { toast } = useToast();
+  const navigate = useNavigate();
   const [events, setEvents] = useState<SystemEvent[]>([]);
   const [logs, setLogs] = useState<SakramLog[]>([]);
   const [isRunningDiagnostic, setIsRunningDiagnostic] = useState(false);
@@ -66,9 +69,29 @@ export default function Dashboard() {
     }
   };
 
+  const handleSignOut = async () => {
+    try {
+      await supabase.auth.signOut();
+      toast({
+        title: "Signed out successfully",
+        description: "You have been signed out of your account.",
+      });
+      navigate("/auth");
+    } catch (error) {
+      toast({
+        title: "Sign out failed",
+        description: "There was an error signing out.",
+        variant: "destructive",
+      });
+    }
+  };
+
   const runDiagnosticChecklist = async () => {
     setIsRunningDiagnostic(true);
     setShowLogs(false);
+    
+    // Clear previous logs
+    await supabase.from('sakram_logs').delete().neq('id', '00000000-0000-0000-0000-000000000000');
     
     // Simulate the Sakram Core workflow
     const simulatedLogs: Omit<SakramLog, 'id' | 'timestamp'>[] = [
@@ -84,12 +107,12 @@ export default function Dashboard() {
       { step_number: 10, component: "Sakram Core", action: "Result Processed", details: "Sakram Core picks up result from PRQ and updates event status" },
     ];
 
-    // Simulate step-by-step execution with delays
+    // Insert all logs at once without showing toasts
     for (let i = 0; i < simulatedLogs.length; i++) {
-      await new Promise(resolve => setTimeout(resolve, 800)); // Delay between steps
+      await new Promise(resolve => setTimeout(resolve, 300)); // Shorter delay
       
       // Insert log into database
-      const { error } = await supabase
+      await supabase
         .from('sakram_logs')
         .insert({
           step_number: simulatedLogs[i].step_number,
@@ -97,16 +120,6 @@ export default function Dashboard() {
           action: simulatedLogs[i].action,
           details: simulatedLogs[i].details,
         });
-
-      if (error) {
-        console.error('Error inserting log:', error);
-      }
-      
-      // Show progress
-      toast({
-        title: `Step ${simulatedLogs[i].step_number}`,
-        description: `${simulatedLogs[i].component}: ${simulatedLogs[i].action}`,
-      });
     }
 
     // Update the event status to resolved
@@ -174,16 +187,26 @@ export default function Dashboard() {
       <div className="container mx-auto px-4 py-8">
         {/* Header */}
         <div className="mb-8">
-          <div className="flex items-center space-x-3 mb-4">
-            <div className="p-2 bg-gradient-saffron rounded-lg shadow-3d">
-              <Shield className="h-6 w-6 text-white" />
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center space-x-3">
+              <div className="p-2 bg-gradient-saffron rounded-lg shadow-3d">
+                <Shield className="h-6 w-6 text-white" />
+              </div>
+              <div>
+                <h1 className="text-3xl font-bold">Sakram Core Dashboard</h1>
+                <p className="text-muted-foreground">
+                  Welcome back, {profile?.name} ({profile?.role})
+                </p>
+              </div>
             </div>
-            <div>
-              <h1 className="text-3xl font-bold">Sakram Core Dashboard</h1>
-              <p className="text-muted-foreground">
-                Welcome back, {profile?.name} ({profile?.role})
-              </p>
-            </div>
+            <Button
+              variant="outline"
+              onClick={handleSignOut}
+              className="flex items-center space-x-2"
+            >
+              <LogOut className="h-4 w-4" />
+              <span>Sign Out</span>
+            </Button>
           </div>
         </div>
 
@@ -388,7 +411,7 @@ export default function Dashboard() {
                   <Alert key={event.id} className="border-secondary">
                     <CheckCircle className="h-4 w-4 text-secondary" />
                     <AlertDescription>
-                      ✅ {event.description.replace('down', 'up')}
+                      ✅ {event.description.replace('down', 'up').replace('Connection to localhost down', 'Connection to localhost up')}
                     </AlertDescription>
                   </Alert>
                 ))}

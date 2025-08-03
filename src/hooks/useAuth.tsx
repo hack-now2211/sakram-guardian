@@ -33,6 +33,38 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
   const [profile, setProfile] = useState<any>(null);
+  const [lastActivity, setLastActivity] = useState(Date.now());
+
+  // Session timeout (30 minutes of inactivity)
+  const SESSION_TIMEOUT = 30 * 60 * 1000;
+
+  useEffect(() => {
+    // Track user activity
+    const updateActivity = () => setLastActivity(Date.now());
+    
+    const events = ['mousedown', 'mousemove', 'keypress', 'scroll', 'touchstart', 'click'];
+    events.forEach(event => {
+      document.addEventListener(event, updateActivity, true);
+    });
+
+    return () => {
+      events.forEach(event => {
+        document.removeEventListener(event, updateActivity, true);
+      });
+    };
+  }, []);
+
+  useEffect(() => {
+    // Check for session timeout
+    const checkTimeout = () => {
+      if (user && Date.now() - lastActivity > SESSION_TIMEOUT) {
+        supabase.auth.signOut();
+      }
+    };
+
+    const interval = setInterval(checkTimeout, 60000); // Check every minute
+    return () => clearInterval(interval);
+  }, [user, lastActivity, SESSION_TIMEOUT]);
 
   useEffect(() => {
     // Set up auth state listener
@@ -42,6 +74,9 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         setUser(session?.user ?? null);
         
         if (session?.user) {
+          // Reset activity timer on sign in
+          setLastActivity(Date.now());
+          
           // Fetch user profile with setTimeout to prevent deadlock
           setTimeout(async () => {
             const { data: profileData } = await supabase
