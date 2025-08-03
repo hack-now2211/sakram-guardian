@@ -67,7 +67,7 @@ export default function LandingPage() {
             
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mt-12">
               <Link to="/auth">
-                <Button variant="tricolor" size="xl" className="group">
+                <Button variant="glass" size="xl" className="group">
                   Get Started Free
                   <ArrowRight className="ml-2 h-5 w-5 transition-transform group-hover:translate-x-1" />
                 </Button>
