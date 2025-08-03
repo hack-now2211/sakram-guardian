@@ -129,6 +129,7 @@ export default function Dashboard() {
         .from('system_events')
         .update({ 
           status: 'resolved',
+          description: 'Connection to localhost up',
           resolved_at: new Date().toISOString(),
         })
         .eq('id', connectivityEvent.id);
@@ -308,10 +309,15 @@ export default function Dashboard() {
                             <CheckCircle className="h-5 w-5 text-secondary" />
                           )}
                           <div>
-                            <p className="font-medium">{event.description}</p>
-                            <p className="text-sm text-muted-foreground">
+                            <div className="font-medium">
+                              {event.status === 'resolved' 
+                                ? event.description.replace('down', 'up').replace('Connection to localhost down', 'Connection to localhost up')
+                                : event.description
+                              }
+                            </div>
+                            <div className="text-sm text-muted-foreground">
                               {new Date(event.created_at).toLocaleString()}
-                            </p>
+                            </div>
                           </div>
                         </div>
                         <Badge variant={event.status === 'active' ? 'destructive' : 'secondary'}>
@@ -347,7 +353,12 @@ export default function Dashboard() {
                           <div className="w-3 h-3 bg-secondary rounded-full" />
                         )}
                         <div>
-                          <p className="font-medium">{event.description}</p>
+                          <div className="font-medium">
+                            {event.status === 'resolved' 
+                              ? event.description.replace('down', 'up').replace('Connection to localhost down', 'Connection to localhost up')
+                              : event.description
+                            }
+                          </div>
                           <div className="flex items-center space-x-4 text-sm text-muted-foreground">
                             <span>Type: {event.event_type}</span>
                             <span>Severity: {event.severity}</span>

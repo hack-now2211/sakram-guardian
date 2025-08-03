@@ -51,14 +51,14 @@ export default function LandingPage() {
         <div className="relative z-10 container mx-auto px-4 text-center">
           <div className="max-w-4xl mx-auto space-y-8">
             <h1 className="text-5xl md:text-7xl font-bold leading-tight">
-              <span className="bg-gradient-saffron bg-clip-text text-transparent">
+              <span className="bg-gradient-saffron bg-clip-text text-transparent drop-shadow-lg">
                 Cybersecurity
               </span>
               <br />
-              <span className="text-foreground">for Everyone</span>
+              <span className="text-foreground drop-shadow-lg">for Everyone</span>
             </h1>
             
-            <p className="text-xl md:text-2xl text-muted-foreground max-w-3xl mx-auto leading-relaxed">
+            <p className="text-xl md:text-2xl text-white max-w-3xl mx-auto leading-relaxed">
               From <span className="text-primary font-semibold">Kirana Stores</span> to{" "}
               <span className="text-secondary font-semibold">Government Departments</span>
               <br />
